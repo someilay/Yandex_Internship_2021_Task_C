@@ -58,12 +58,30 @@ int findMin(int j, int k, int left, int right, const int* A, const int* S){
         return D(j, left, k, A, S);
     }
 
+    if (right - left == 1){
+        int lSum = D(j, left, k, A, S);
+        int rSum = D(j, right, k, A, S);
+        return lSum < rSum ? lSum : rSum;
+    }
+
     int medium = (left + right) / 2;
 
-    int lSum = findMin(j, k, left, medium, A, S);
-    int rSum = findMin(j, k, medium + 1, right, A, S);
+    int mSum = D(j, medium, k, A, S);
+    int mrSum = D(j, medium + 1, k, A, S);
+    int mlSum = D(j, medium - 1, k, A, S);
 
-    return lSum < rSum ? lSum : rSum;
+    if (mrSum < mSum && mSum <= mlSum){
+        return findMin(j, k, medium + 1, right, A, S);
+    } else if (mlSum < mSum && mSum <= mrSum){
+        return findMin(j, k, left, medium - 1, A, S);
+    } else if (mlSum > mSum && mSum < mrSum){
+        return mSum;
+    } else {
+        int lSum = findMin(j, k, left, medium - 1, A, S);
+        int rSum = findMin(j, k, medium + 1, right, A, S);
+
+        return std::min(std::min(lSum, rSum), mSum);
+    }
 }
 
 int* alg2(int* input, int n, int k){
@@ -179,10 +197,10 @@ int* randArray(int n, int min_, int max_){
 
 int main() {
     srand(time(nullptr));
-    const int NUMBER_OF_TEST = 1000;
-    const int MAX_SIZE = 1000;
+    const int NUMBER_OF_TEST = 100;
+    const int MAX_SIZE = 5000;
     const int MIN_SIZE = 5;
-    const int MAX_VALUE = 100000;
+    const int MAX_VALUE = 1000000;
     const int MIN_VALUE = 1;
 
     for (int i = 0; i < NUMBER_OF_TEST; i++) {
@@ -227,6 +245,20 @@ int main() {
         free(ans1);
         free(ans2);
     }
+
+    const int ABSOLUTE_MAX_SIZE = 300000;
+    const int ABSOLUTE_MAX_K = 299999;
+    const int ABSOLUTE_MAX_VALUE = 100000000;
+
+    int* input = randArray(ABSOLUTE_MAX_SIZE, 0, ABSOLUTE_MAX_VALUE);
+
+    clock_t tStart = clock();
+    alg2(input, ABSOLUTE_MAX_SIZE, ABSOLUTE_MAX_K);
+    printf("Algorithm 2 taken: %.2fs\n", (double)(clock() - tStart)/CLOCKS_PER_SEC);
+
+    tStart = clock();
+    alg1(input, ABSOLUTE_MAX_SIZE, ABSOLUTE_MAX_K);
+    printf("Algorithm 1 taken: %.2fs\n", (double)(clock() - tStart)/CLOCKS_PER_SEC);
 
     return 0;
 }
